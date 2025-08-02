@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Agent Dashboard - Ticket System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i data-feather="headphones" class="me-2"></i>
+            All Tickets
+            {% if user.is_admin() %}
+            <span class="badge bg-danger ms-2">Admin</span>
+            {% else %}
+            <span class="badge bg-info ms-2">Agent</span>
+            {% endif %}
+        </h1>
+
+        {% if tickets %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Subject</th>
+                        <th>Created By</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td><strong>#{{ ticket.id }}</strong></td>
+                        <td>{{ ticket.subject }}</td>
+                        <td>
+                            <i data-feather="user" class="me-1"></i>
+                            {{ ticket.creator.username }}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if ticket.status == 'Resolved' else 'warning' if ticket.status == 'In Progress' else 'secondary' }}">
+                                {{ ticket.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>{{ ticket.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <small>{{ ticket.updated_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('view_ticket', ticket_id=ticket.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i data-feather="eye" class="me-1"></i>
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Summary Statistics -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-secondary">{{ tickets|selectattr('status', 'equalto', 'Open')|list|length }}</h3>
+                        <p class="mb-0">Open Tickets</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-warning">{{ tickets|selectattr('status', 'equalto', 'In Progress')|list|length }}</h3>
+                        <p class="mb-0">In Progress</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-success">{{ tickets|selectattr('status', 'equalto', 'Resolved')|list|length }}</h3>
+                        <p class="mb-0">Resolved</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i data-feather="inbox" style="width: 64px; height: 64px;" class="text-muted mb-3"></i>
+            <h3 class="text-muted">No tickets found</h3>
+            <p class="text-muted">No tickets have been created yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
